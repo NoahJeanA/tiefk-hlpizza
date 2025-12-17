@@ -3,17 +3,25 @@ name: Create Release
 on:
   push:
     tags:
-      - 'v*.*.*' 
+      - 'v*.*.*'
 
 permissions:
   contents: write
 
 jobs:
-  create-release:
+  release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.25.3'
+
+      - name: Build
+        run: go build -v -o tiefk-hlpizza
 
       - name: Create Release
         id: create_release
@@ -27,3 +35,13 @@ jobs:
             Changes in this release
           draft: false
           prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./tiefk-hlpizza
+          asset_name: tiefk-hlpizza
+          asset_content_type: application/octet-stream
