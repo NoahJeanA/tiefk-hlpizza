@@ -27,9 +27,9 @@ Since the binary runs as a background system service, it requires a PATH overrid
     This ensures the binary uses the global `lock-sessions` command.
     ```bash
     sudo bash -c 'cat <<EOF > /usr/local/lib/pizza-overrides/loginctl
-#!/bin/bash
-/usr/bin/loginctl lock-sessions
-EOF'
+    #!/bin/bash
+    /usr/bin/loginctl lock-sessions
+    EOF'
     sudo chmod +x /usr/local/lib/pizza-overrides/loginctl
     ```
 
@@ -66,6 +66,7 @@ EOF'
 ## Usage
 
 Check if the service is running and monitoring inputs:
+
 ```bash
 sudo systemctl status pizzalieferant.service
 journalctl -u pizzalieferant.service -f
