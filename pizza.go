@@ -148,17 +148,37 @@ func detectKeyboardLayout() (string, error) {
 	}
 
 	scanner := bufio.NewScanner(&out)
+	x11Layout := ""
+	vcKeymap := ""
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.Contains(line, "X11 Layout") {
 			parts := strings.Split(line, ":")
 			if len(parts) > 1 {
-				layout := strings.TrimSpace(parts[1])
-				return strings.Split(layout, ",")[0], nil
+				x11Layout = strings.TrimSpace(parts[1])
+			}
+		} else if strings.Contains(line, "VC Keymap") {
+			parts := strings.Split(line, ":")
+			if len(parts) > 1 {
+				vcKeymap = strings.TrimSpace(parts[1])
 			}
 		}
 	}
-	return "us", fmt.Errorf("X11 Layout not found in 'localectl' output")
+
+	if x11Layout != "" && x11Layout != "(unset)" {
+		return strings.Split(x11Layout, ",")[0], nil
+	}
+
+	if vcKeymap != "" && vcKeymap != "(unset)" {
+		// Extract base layout (e.g., "de" from "de-latin1")
+		layoutPrefix := strings.Split(vcKeymap, "-")[0]
+		if layoutPrefix == "de" { // Only handle "de" for now, as generateKeyMap only knows "us" and "de"
+			return "de", nil
+		}
+	}
+
+	return "us", fmt.Errorf("neither X11 Layout nor VC Keymap found or set in 'localectl' output")
 }
 
 func generateKeyMap(layout string) map[uint16]rune {
